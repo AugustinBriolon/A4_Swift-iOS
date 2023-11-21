@@ -8,38 +8,44 @@ enum DeviceType: String, CaseIterable {
     case Airpod = "🎧 AirPod"
 }
 
-class test: Identifiable {
-    var id = UUID()
-    var name: String
-    var purchaseDate: Date
-    var imageURL: String
-
-    init(name: String, purchaseDate: Date, imageURL: String) {
-        self.name = name
-        self.purchaseDate = purchaseDate
-        self.imageURL = imageURL
-    }
-}
-
 struct NewDeviceScreen: View {
-    @Binding var items: [Item]
-    
-    @State private var itemName = ""
-    @State private var purchaseDate = Date()
-    @State private var serialNumber = ""
-    @State private var selectedDevice: DeviceType = .iPhone
-    @State private var selectedModel = ""
-    @State private var imageURL = ""
-    @State private var image: Image? = nil
+    @Binding var devices: [DataSchema]
+    var existingDevice: DataSchema?
+
+    @State private var deviceName: String
+    @State private var purchaseDate: Date
+    @State private var selectedDevice: DeviceType
+    @State private var selectedModel: String
+    @State private var imageURL: String
+    @State private var image: Image?
     @State private var errorAlert: Alert?
+
+    init(devices: Binding<[DataSchema]>, existingDevice: DataSchema? = nil) {
+        _devices = devices
+        self.existingDevice = existingDevice
+
+        // Initialisation des états en fonction de la présence ou non d'un élément existant
+        if let existingDevice = existingDevice {
+            _deviceName = State(initialValue: existingDevice.deviceName)
+            _purchaseDate = State(initialValue: existingDevice.purchaseDate)
+            _selectedDevice = State(initialValue: DeviceType(rawValue: existingDevice.selectedDevice) ?? .iPhone)
+            _selectedModel = State(initialValue: existingDevice.selectedModel)
+            _imageURL = State(initialValue: existingDevice.imageURL)
+        } else {
+            _deviceName = State(initialValue: "")
+            _purchaseDate = State(initialValue: Date())
+            _selectedDevice = State(initialValue: .iPhone)
+            _selectedModel = State(initialValue: "")
+            _imageURL = State(initialValue: "")
+        }
+    }
 
     var body: some View {
         NavigationView {
             VStack {
                 Form {
                     Section {
-                        TextField("Nom de l'élément", text: $itemName)
-                        TextField("Numéro de série", text: $serialNumber)
+                        TextField("Nom de l'élément", text: $deviceName)
                     }
 
                     Section {
@@ -97,7 +103,6 @@ struct NewDeviceScreen: View {
                         }
                         .padding()
                         
-                        // Affichage de l'image
                         if let image = image {
                             image
                                 .resizable()
@@ -110,15 +115,15 @@ struct NewDeviceScreen: View {
                 }
 
                 Button(action: {
-                    // Action à ajouter plus tard
+                    addNewDevice()
                 }) {
                     Text("Ajouter 🚀")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .cornerRadius(10)
                 }
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .background(Color.white)
-                .padding()
-                .border(/*@START_MENU_TOKEN@*/Color.black/*@END_MENU_TOKEN@*/, width: 1)
                 
                 Spacer()
             }
@@ -147,5 +152,26 @@ struct NewDeviceScreen: View {
 
     private func showErrorAlert(message: String) {
         errorAlert = Alert(title: Text("Erreur"), message: Text(message), dismissButton: .default(Text("OK")))
+    }
+
+    private func addNewDevice() {
+        let newDevice = DataSchema(
+            deviceName: deviceName,
+            purchaseDate: purchaseDate,
+            serialNumber: "", // Ajoute le numéro de série si nécessaire
+            selectedDevice: selectedDevice.rawValue,
+            selectedModel: selectedModel,
+            imageURL: imageURL
+        )
+
+        // Ajoute le nouvel élément à la liste
+        devices.append(newDevice)
+
+        // Remets à zéro les champs après l'ajout
+        deviceName = ""
+        purchaseDate = Date()
+        selectedDevice = .iPhone
+        selectedModel = ""
+        imageURL = ""
     }
 }

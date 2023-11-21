@@ -1,57 +1,55 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var items: [Item] = [
-        Item(name: "iPhone 12", purchaseDate: Date(), imageURL: "https://example.com/iphone12.jpg"),
-        Item(name: "MacBook Air", purchaseDate: Date(), imageURL: "https://example.com/macbookair.jpg"),
-        // Ajoute d'autres éléments selon tes besoins
-    ]
+    @State private var devices: [DataSchema] = DataSchema.DataPreview
+    @State private var selectedDevice: DataSchema? = nil
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(items) { item in
-                    HStack {
-                        // Image à gauche
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 50)
-                            .clipShape(Circle())
+                ForEach(devices) { device in
+                    NavigationLink(destination: NewDeviceScreen(devices: $devices, existingDevice: device)) {
+                        HStack {
+                            // Image à gauche
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
 
-                        // Nom de l'item et date d'achat
-                        VStack(alignment: .leading) {
-                            Text(item.name)
-                                .font(.headline)
-                            Text(item.purchaseDate, style: .date)
-                                .font(.subheadline)
+                            VStack(alignment: .leading) {
+                                Text(device.deviceName)
+                                    .font(.headline)
+                                Text(device.purchaseDate, style: .date)
+                                    .font(.subheadline)
+                            }
                         }
                     }
                 }
-                .onDelete(perform: deleteItem)
+                .onDelete(perform: deleteDevice)
             }
             .navigationBarTitle("Liste des Éléments")
+            .navigationBarItems(trailing: addButton)
             .navigationBarItems(trailing: EditButton())
-            
-            NavigationLink(destination: NewDeviceScreen(items: $items), label: {
+
+            NavigationLink(destination: NewDeviceScreen(devices: $devices)) {
                 Text("Add new")
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
-            })
+                    .foregroundColor(.blue)
+            }
         }
     }
 
-    private func deleteItem(at offsets: IndexSet) {
-        items.remove(atOffsets: offsets)
+    private var addButton: some View {
+        NavigationLink(destination: NewDeviceScreen(devices: $devices)) {
+            Image(systemName: "plus.circle")
+        }
     }
-}
 
-struct Item: Identifiable {
-    var id = UUID()
-    var name: String
-    var purchaseDate: Date
-    var imageURL: String
+    private func deleteDevice(at offsets: IndexSet) {
+        devices.remove(atOffsets: offsets)
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
