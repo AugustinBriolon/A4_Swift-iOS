@@ -4,6 +4,7 @@ import Combine
 private let deviceNameKey = "DeviceName"
 private let serialNumberKey = "SerialNumber"
 private let purchaseDateKey = "PurchaseDate"
+private let purchasePrice = "PurchasePrice"
 private let selectedDeviceKey = "SelectedDevice"
 private let selectedModelKey = "SelectedModel"
 private let imageURLKey = "ImageURL"
@@ -23,8 +24,9 @@ struct NewDeviceScreen: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State private var deviceName: String
-    @State private var serialNumber: Double?
+    @State private var serialNumber: String
     @State private var purchaseDate: Date
+    @State private var purchasePrice: String
     @State private var selectedDevice: DeviceType
     @State private var selectedModel: String
     @State private var imageURL: String
@@ -39,13 +41,15 @@ struct NewDeviceScreen: View {
             _deviceName = State(initialValue: existingDevice.deviceName)
             _serialNumber = State(initialValue: existingDevice.serialNumber)
             _purchaseDate = State(initialValue: existingDevice.purchaseDate)
+            _purchasePrice = State(initialValue: existingDevice.purchasePrice)
             _selectedDevice = State(initialValue: existingDevice.selectedDevice)
             _selectedModel = State(initialValue: existingDevice.selectedModel)
             _imageURL = State(initialValue: existingDevice.imageURL)
         } else {
             _deviceName = State(initialValue: "")
-            _serialNumber = State(initialValue: 00000)
+            _serialNumber = State(initialValue: "")
             _purchaseDate = State(initialValue: Date())
+            _purchasePrice = State(initialValue: "")
             _selectedDevice = State(initialValue: .iPhone)
             _selectedModel = State(initialValue: "")
             _imageURL = State(initialValue: "")
@@ -55,6 +59,16 @@ struct NewDeviceScreen: View {
     private func deviceInfoSection() -> some View {
         Section {
             TextField("Nom de l'élément", text: $deviceName)
+            TextField("Numéro de série", text: $serialNumber)
+                .keyboardType(.numberPad)
+        }
+    }
+    
+    private func devicePurchaseSection() -> some View {
+        Section {
+            DatePicker("Date d'achat", selection: $purchaseDate, displayedComponents: .date)
+            TextField("Numéro de série", text: $purchasePrice)
+                .keyboardType(.numberPad)
         }
     }
 
@@ -130,6 +144,7 @@ struct NewDeviceScreen: View {
             VStack {
                 Form {
                     deviceInfoSection()
+                    devicePurchaseSection()
                     deviceTypeSection()
                     imageSection()
                 }
@@ -191,6 +206,7 @@ struct NewDeviceScreen: View {
             let newDevice = DataSchema(
                 deviceName: deviceName,
                 purchaseDate: purchaseDate,
+                purchasePrice: purchasePrice,
                 serialNumber: serialNumber,
                 selectedDevice: selectedDevice,
                 selectedModel: selectedModel,
@@ -207,8 +223,9 @@ struct NewDeviceScreen: View {
     private func resetFields() {
         // Remets à zéro les champs après l'ajout ou la modification
         deviceName = ""
-        serialNumber = nil
+        serialNumber = ""
         purchaseDate = Date()
+        purchasePrice = ""
         selectedDevice = .iPhone
         selectedModel = ""
         imageURL = ""

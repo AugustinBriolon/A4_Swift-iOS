@@ -5,6 +5,10 @@ struct ContentView: View {
     @State private var showDeviceScreen = false
     @State private var selectedDevice: DataSchema? = nil
 
+    var totalCost: Double {
+        devices.compactMap { Double($0.purchasePrice) }.reduce(0, +)
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -18,6 +22,15 @@ struct ContentView: View {
                 .onDelete(perform: deleteDevice)
                 .onMove { indexSet, index in
                     devices.move(fromOffsets: indexSet, toOffset: index)
+                }
+                Section {
+                    HStack {
+                        Text("Coût total :")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(totalCost) €")
+                            .font(.headline)
+                    }
                 }
             }
             .navigationBarTitle("Liste des Éléments")
@@ -33,6 +46,8 @@ struct ContentView: View {
             .sheet(isPresented: $showDeviceScreen) {
                 NewDeviceScreen(devices: $devices, existingDevice: selectedDevice)
             }
+
+            
         }
     }
 
