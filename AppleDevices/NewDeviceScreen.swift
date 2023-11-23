@@ -67,7 +67,7 @@ struct NewDeviceScreen: View {
     private func devicePurchaseSection() -> some View {
         Section {
             DatePicker("Date d'achat", selection: $purchaseDate, displayedComponents: .date)
-            TextField("Numéro de série", text: $purchasePrice)
+            TextField("Prix d'achat", text: $purchasePrice)
                 .keyboardType(.numberPad)
         }
     }
@@ -121,13 +121,8 @@ struct NewDeviceScreen: View {
                 loadImage()
             }) {
                 Text("Charger l'image")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.black)
-                    .cornerRadius(10)
+                    .foregroundColor(.blue)
             }
-            .padding()
 
             if let image = image {
                 image
@@ -154,9 +149,8 @@ struct NewDeviceScreen: View {
                 }) {
                     Text(existingDevice == nil ? "Ajouter 🚀" : "Modifier 🔄")
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.black)
                         .cornerRadius(10)
                 }
 
