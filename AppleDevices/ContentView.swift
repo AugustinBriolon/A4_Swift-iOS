@@ -1,3 +1,11 @@
+//
+//  DeviceStore.swift
+//  AppleDevices
+//
+//  Created by AUGUSTIN BRIOLON on 20/11/2023.
+//
+
+
 import SwiftUI
 
 struct ContentView: View {
@@ -5,6 +13,10 @@ struct ContentView: View {
     @State private var showDeviceScreen = false
     @State private var selectedDevice: DataSchema? = nil
     @State private var usdValue: Double?
+    @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var deviceStore = DeviceStore()
+    
+    let saveAction: () -> Void
     
     var totalCost: Double {
         devices.compactMap { Double($0.purchasePrice) }.reduce(0, +)
@@ -75,8 +87,26 @@ struct ContentView: View {
             .sheet(isPresented: $showDeviceScreen) {
                 NewDeviceScreen(devices: $devices, existingDevice: selectedDevice)
             }
-            
-            
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .inactive {
+                Task {
+                    do {
+                        try await deviceStore.save(devices: devices)
+                    } catch {
+                        print("Error saving data in saveAction: \(error)")
+                    }
+                }
+            }
+        }
+        .onAppear {
+            Task {
+                do {
+                    try await deviceStore.load()
+                } catch {
+                    fatalError(error.localizedDescription)
+                }
+            }
         }
     }
     
@@ -110,9 +140,11 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(saveAction: {})
     }
+    
 }
+
 
 struct DeviceRow: View {
     let device: DataSchema

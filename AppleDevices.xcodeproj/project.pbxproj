@@ -13,6 +13,7 @@
 		BA7EC4AE2B0B8E1600F54435 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA7EC4AD2B0B8E1600F54435 /* Preview Assets.xcassets */; };
 		BA7EC4D32B0BAE7200F54435 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7EC4D22B0BAE7200F54435 /* Data.swift */; };
 		BA7EC4D52B0BAE8600F54435 /* NewDeviceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7EC4D42B0BAE8600F54435 /* NewDeviceScreen.swift */; };
+		BAB760832B0F5E6100FF0564 /* DeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB760822B0F5E6100FF0564 /* DeviceStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +43,7 @@
 		BA7EC4BD2B0B8E1600F54435 /* AppleDevicesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppleDevicesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA7EC4D22B0BAE7200F54435 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		BA7EC4D42B0BAE8600F54435 /* NewDeviceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewDeviceScreen.swift; sourceTree = "<group>"; };
+		BAB760822B0F5E6100FF0564 /* DeviceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +94,7 @@
 			children = (
 				BA7EC4A62B0B8E1600F54435 /* AppleDevicesApp.swift */,
 				BA7EC4A82B0B8E1600F54435 /* ContentView.swift */,
+				BAB760822B0F5E6100FF0564 /* DeviceStore.swift */,
 				BA7EC4AA2B0B8E1600F54435 /* Assets.xcassets */,
 				BA7EC4AC2B0B8E1600F54435 /* Preview Content */,
 				BA7EC4D22B0BAE7200F54435 /* Data.swift */,
@@ -241,6 +244,7 @@
 				BA7EC4A92B0B8E1600F54435 /* ContentView.swift in Sources */,
 				BA7EC4D32B0BAE7200F54435 /* Data.swift in Sources */,
 				BA7EC4D52B0BAE8600F54435 /* NewDeviceScreen.swift in Sources */,
+				BAB760832B0F5E6100FF0564 /* DeviceStore.swift in Sources */,
 				BA7EC4A72B0B8E1600F54435 /* AppleDevicesApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

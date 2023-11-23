@@ -1,15 +1,16 @@
 import SwiftUI
-import Combine
 
-private let deviceNameKey = "DeviceName"
-private let serialNumberKey = "SerialNumber"
-private let purchaseDateKey = "PurchaseDate"
-private let purchasePrice = "PurchasePrice"
-private let selectedDeviceKey = "SelectedDevice"
-private let selectedModelKey = "SelectedModel"
-private let imageURLKey = "ImageURL"
+struct DeviceInfo {
+    var deviceName: String
+    var serialNumber: String
+    var purchaseDate: Date
+    var purchasePrice: String
+    var selectedDevice: DeviceType
+    var selectedModel: String
+    var imageURL: String
+}
 
-enum DeviceType: String, CaseIterable {
+enum DeviceType: String, CaseIterable, Codable {
     case iPhone = "📱 iPhone"
     case MacBook = "💻 MacBook"
     case Watch = "⌚️ Watch"
@@ -23,13 +24,7 @@ struct NewDeviceScreen: View {
     
     @Environment(\.presentationMode) var presentationMode
     
-    @State private var deviceName: String
-    @State private var serialNumber: String
-    @State private var purchaseDate: Date
-    @State private var purchasePrice: String
-    @State private var selectedDevice: DeviceType
-    @State private var selectedModel: String
-    @State private var imageURL: String
+    @State private var deviceInfo: DeviceInfo
     @State private var image: Image?
     @State private var showAlert = false
     @State private var errorAlert: Alert?
@@ -37,44 +32,28 @@ struct NewDeviceScreen: View {
     init(devices: Binding<[DataSchema]>, existingDevice: DataSchema? = nil) {
         _devices = devices
         self.existingDevice = existingDevice
-        if let existingDevice = existingDevice {
-            _deviceName = State(initialValue: existingDevice.deviceName)
-            _serialNumber = State(initialValue: existingDevice.serialNumber)
-            _purchaseDate = State(initialValue: existingDevice.purchaseDate)
-            _purchasePrice = State(initialValue: existingDevice.purchasePrice)
-            _selectedDevice = State(initialValue: existingDevice.selectedDevice)
-            _selectedModel = State(initialValue: existingDevice.selectedModel)
-            _imageURL = State(initialValue: existingDevice.imageURL)
-        } else {
-            _deviceName = State(initialValue: "")
-            _serialNumber = State(initialValue: "")
-            _purchaseDate = State(initialValue: Date())
-            _purchasePrice = State(initialValue: "")
-            _selectedDevice = State(initialValue: .iPhone)
-            _selectedModel = State(initialValue: "")
-            _imageURL = State(initialValue: "")
-        }
+        _deviceInfo = State(initialValue: existingDevice?.toDeviceInfo() ?? DeviceInfo.default)
     }
 
     private func deviceInfoSection() -> some View {
         Section {
-            TextField("Nom de l'élément", text: $deviceName)
-            TextField("Numéro de série", text: $serialNumber)
+            TextField("Nom de l'élément", text: $deviceInfo.deviceName)
+            TextField("Numéro de série", text: $deviceInfo.serialNumber)
                 .keyboardType(.numberPad)
         }
     }
     
     private func devicePurchaseSection() -> some View {
         Section {
-            DatePicker("Date d'achat", selection: $purchaseDate, displayedComponents: .date)
-            TextField("Prix d'achat", text: $purchasePrice)
+            DatePicker("Date d'achat", selection: $deviceInfo.purchaseDate, displayedComponents: .date)
+            TextField("Prix d'achat", text: $deviceInfo.purchasePrice)
                 .keyboardType(.numberPad)
         }
     }
 
     private func deviceTypeSection() -> some View {
         Section {
-            Picker("Type d'appareil", selection: $selectedDevice) {
+            Picker("Type d'appareil", selection: $deviceInfo.selectedDevice) {
                 ForEach(DeviceType.allCases, id: \.self) { device in
                     Text(device.rawValue)
                 }
@@ -84,39 +63,42 @@ struct NewDeviceScreen: View {
     }
 
     private func deviceModelPicker() -> some View {
-        switch selectedDevice {
-        case .iPhone:
-            return AnyView(Picker("Modèle d'iPhone", selection: $selectedModel) {
-                ForEach(["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15"], id: \.self) {
-                    Text($0)
-                }
-            })
-        case .MacBook:
-            return AnyView(Picker("Modèle de MacBook", selection: $selectedModel) {
-                Text("MacBook Air")
-                Text("MacBook Pro")
-            })
-        case .Watch:
-            return AnyView(Picker("Modèle de Watch", selection: $selectedModel) {
-                Text("Watch SE")
-                Text("Watch Ultra")
-            })
-        case .HomePod:
-            return AnyView(Picker("Modèle d'HomePod", selection: $selectedModel) {
-                Text("HomePod")
-                Text("HomePod Mini")
-            })
-        case .Airpod:
-            return AnyView(Picker("Modèle d'Airpod", selection: $selectedModel) {
-                Text("Airpod Pro")
-                Text("Airpod Max")
-            })
+        Section {
+            switch deviceInfo.selectedDevice {
+            case .iPhone:
+                return AnyView(Picker("Modèle d'iPhone", selection: $deviceInfo.selectedModel) {
+                    ForEach(["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15"], id: \.self) {
+                        Text($0)
+                    }
+                })
+            case .MacBook:
+                return AnyView(Picker("Modèle de MacBook", selection: $deviceInfo.selectedModel) {
+                    Text("MacBook Air")
+                    Text("MacBook Pro")
+                })
+            case .Watch:
+                return AnyView(Picker("Modèle de Watch", selection: $deviceInfo.selectedModel) {
+                    Text("Watch SE")
+                    Text("Watch Ultra")
+                })
+            case .HomePod:
+                return AnyView(Picker("Modèle d'HomePod", selection: $deviceInfo.selectedModel) {
+                    Text("HomePod")
+                    Text("HomePod Mini")
+                })
+            case .Airpod:
+                return AnyView(Picker("Modèle d'Airpod", selection: $deviceInfo.selectedModel) {
+                    Text("Airpod Pro")
+                    Text("Airpod Max")
+                })
+            }
         }
     }
 
+
     private func imageSection() -> some View {
         Section {
-            TextField("URL de l'image", text: $imageURL)
+            TextField("URL de l'image", text: $deviceInfo.imageURL)
             Button(action: {
                 loadImage()
             }) {
@@ -164,7 +146,7 @@ struct NewDeviceScreen: View {
     }
 
     private func loadImage() {
-        if let url = URL(string: imageURL) {
+        if let url = URL(string: deviceInfo.imageURL) {
             URLSession.shared.dataTask(with: url) { data, response, error in
                 if let data = data {
                     if let uiImage = UIImage(data: data) {
@@ -188,40 +170,60 @@ struct NewDeviceScreen: View {
     }
 
     private func addOrUpdateDevice() {
-        if let existingDeviceIndex = devices.firstIndex(where: { $0.id == existingDevice?.id }) {
-            devices[existingDeviceIndex].deviceName = deviceName
-            devices[existingDeviceIndex].serialNumber = serialNumber
-            devices[existingDeviceIndex].purchaseDate = purchaseDate
-            devices[existingDeviceIndex].selectedDevice = selectedDevice
-            devices[existingDeviceIndex].selectedModel = selectedModel
-            devices[existingDeviceIndex].imageURL = imageURL
-        } else {
-            // Ajout d'un nouvel élément
-            let newDevice = DataSchema(
-                deviceName: deviceName,
-                purchaseDate: purchaseDate,
-                purchasePrice: purchasePrice,
-                serialNumber: serialNumber,
-                selectedDevice: selectedDevice,
-                selectedModel: selectedModel,
-                imageURL: imageURL
-            )
+        let dataSchema = deviceInfo.toDataSchema()
 
-            // Ajoute le nouvel élément à la liste
-            devices.append(newDevice)
+        if let existingDeviceIndex = devices.firstIndex(where: { $0.id == existingDevice?.id }) {
+            devices[existingDeviceIndex] = dataSchema
+        } else {
+            devices.append(dataSchema)
         }
+
+        resetFields()
         presentationMode.wrappedValue.dismiss()
     }
-
-
+    
     private func resetFields() {
-        // Remets à zéro les champs après l'ajout ou la modification
-        deviceName = ""
-        serialNumber = ""
-        purchaseDate = Date()
-        purchasePrice = ""
-        selectedDevice = .iPhone
-        selectedModel = ""
-        imageURL = ""
+        deviceInfo = DeviceInfo.default
+        image = nil
+    }
+}
+
+private extension DeviceInfo {
+    func toDataSchema() -> DataSchema {
+        return DataSchema(
+            deviceName: deviceName,
+            purchaseDate: purchaseDate,
+            purchasePrice: purchasePrice,
+            serialNumber: serialNumber,
+            selectedDevice: selectedDevice,
+            selectedModel: selectedModel,
+            imageURL: imageURL
+        )
+    }
+    
+    static var `default`: DeviceInfo {
+        return DeviceInfo(
+            deviceName: "",
+            serialNumber: "",
+            purchaseDate: Date(),
+            purchasePrice: "",
+            selectedDevice: .iPhone,
+            selectedModel: "",
+            imageURL: ""
+        )
+    }
+}
+
+private extension DataSchema {
+    func toDeviceInfo() -> DeviceInfo {
+        return DeviceInfo(
+            deviceName: deviceName,
+            serialNumber: serialNumber,
+            purchaseDate: purchaseDate,
+            purchasePrice: purchasePrice,
+            selectedDevice: selectedDevice,
+            selectedModel: selectedModel,
+            imageURL: imageURL
+        )
     }
 }
